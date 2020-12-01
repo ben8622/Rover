@@ -16,15 +16,17 @@ HOST = 'localhost'
 FORWARD = 'ABS_RZ'
 BACKWARD = 'ABS_Z'
 
-board =             pyfirmata.ArduinoMega('COM4')
+board =             pyfirmata.ArduinoMega('COM3')
 l_motor_pin =       board.get_pin('d:11:p')
 r_motor_pin =       board.get_pin('d:12:p')
 motor_toggle_pin =  board.get_pin('d:24:o')
 
+
 # constantly updates statuses for example if reading analog input from potentiometer
+"""
 it = pyfirmata.util.Iterator(board)
 it.start()
-
+"""
 controller_command = 'A'
 
 ser = 0
@@ -85,7 +87,7 @@ def Client_Send(clientsocket, data):
 def Client_Receive(clientsocket):
     global ser
     counter = 0
-    while (counter < 1000):
+    while (counter < 1000   ):
 
         # no forward or reverse command, stop
         motor_toggle_pin.write(0)

@@ -1,13 +1,35 @@
-import msvcrt
+"""
+CONTROL SCHEME
+
+Left trigger            = power sent to left motors
+Right trigger           = power sent to right motors
+Left + Right bumpers    = motors now go in reverse
+A button                = toggles full power
+Select button           = exit program
+
+Making senese of the "power" values:
+0 - 0.49 | motors in "reverse", 0 is full power
+0.51 - 1 | motors in "forwards", 1 is full power
+0.5      | motors is not moving
+
+"""
 import pyfirmata
+import pygame
 import time
+from pygame.locals import *
 
-# BASIC DRIVE CONTROL VALUES
-FORWARD = bytes([255])
-REVERSE = bytes([0])
-STOP = bytes([127])
+pygame.init()
 
-board = pyfirmata.ArduinoMega('COM4')
+# controller setup
+joysticks = []
+
+for i in range(pygame.joystick.get_count()):
+    joysticks.append(pygame.joystick.Joystick(i))
+    joysticks[-1].init()
+
+controller = joysticks[0]
+
+board = pyfirmata.ArduinoMega('COM3')
 
 # setting pins
 onboard_led =       board.get_pin('d:13:o')
@@ -19,41 +41,51 @@ motor_toggle_pin =  board.get_pin('d:24:o')
 it = pyfirmata.util.Iterator(board)
 it.start()
 
-# will be used to determine drive controls from keyboard input
-ctrl = ''
+# pressing 'select' will quit program
+while(1):
+    pygame.event.pump()
 
-
-# pressing 'q' will quit program
-while(ctrl != b'q'):
-    
     # puts rover in "stop" state if no input, avoids rover from "running away"
     motor_toggle_pin.write(0)
     l_motor_pin.write(.49804)
     r_motor_pin.write(.49804)
-    
-    # grab input from keyboard, don't have to press enter
-    ctrl = msvcrt.getch()
-    
-    # forward drive, press 'w'
-    if(ctrl == b'w'):
-        motor_toggle_pin.write(1)
-        l_motor_pin.write(1)
-        r_motor_pin.write(1)
-        time.sleep(.05)
-        print("forwards")
-        
-    # backwards drive, press 's'
-    elif(ctrl == b's'):
-        motor_toggle_pin.write(1)
-        l_motor_pin.write(0)
-        r_motor_pin.write(0)
-        time.sleep(.05)
-        print("backwards")
-        
-        
+
+    if(controller.get_button(6)):
+        print("Exiting...")
+        exit()
+
+    # divider ensure only half power given unless "A" button pressed down
+    divider = 0.125
+    reverse = False
+    right_power = controller.get_axis(2)
+    left_power = controller.get_axis(5)
+
+    # "A" button pressed, give full power
+    if(controller.get_button(0)):
+        divider =  0.25
+
+    right_power =   divider * (right_power + 1)
+    left_power =    divider * (left_power + 1)
+
+    # Bumpers are pressed, go reverse. Must be doing both to avoid breaking bot
+    if(controller.get_button(4) and controller.get_button(5)):
+        left_power =    0.5 - left_power
+        right_power =   0.5 - right_power
+        reverse = True
+    else:
+        left_power =    0.5 + left_power
+        right_power =   0.5 + right_power
+
+    # send motors their values
+    motor_toggle_pin.write(1)
+    l_motor_pin.write(left_power)
+    r_motor_pin.write(right_power)
+
+    print(f"L Power:{left_power} |R Power:{right_power}")
+    # avoid cpu overloading
+    time.sleep(.05)
+
 # after exiting while loop, "turn off" motors
 motor_toggle_pin.write(0)
 l_motor_pin.write(.49804)
 r_motor_pin.write(.49804)
-        
-    
