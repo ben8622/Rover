@@ -4,48 +4,23 @@ Gregory Ferguson
 """
 import socket
 import threading
-import msvcrt
 import pyfirmata
 import time
 import struct
 
-
-#HOST = '192.168.43.179'
-HOST = 'localhost'
+# raspberry pi's static ip
+HOST = '192.168.4.1'
 
 FORWARD = 'ABS_RZ'
 BACKWARD = 'ABS_Z'
 
-board =             pyfirmata.ArduinoMega('COM3')
+# setting up the board
+board =             pyfirmata.ArduinoMega('/dev/ttyACM0')
 l_motor_pin =       board.get_pin('d:11:p')
 r_motor_pin =       board.get_pin('d:12:p')
 motor_toggle_pin =  board.get_pin('d:24:o')
 
-
-# constantly updates statuses for example if reading analog input from potentiometer
-"""
-it = pyfirmata.util.Iterator(board)
-it.start()
-"""
-controller_command = 'A'
-
-ser = 0
-
-
-
-"""
-TODO
-
-Need to implement a standard between server and arduino to allow for communication.
-"""
-
-
 def Serial_Send(data, ser):
-
-
-    #print("NA")
-    #At this point, need to use struct to pack that data into bytes
-
 
     #Once you have the data in bytes, send to embedded system.
     encoded_data = []
@@ -87,7 +62,7 @@ def Client_Send(clientsocket, data):
 def Client_Receive(clientsocket):
     global ser
     counter = 0
-    while (counter < 1000   ):
+    while (true):
 
         # no forward or reverse command, stop
         motor_toggle_pin.write(0)
@@ -96,7 +71,7 @@ def Client_Receive(clientsocket):
 
         counter += 1
 
-        data = (clientsocket.recv(1024))
+        data = clientsocket.recv(2048)
 
         strings = data.decode('utf8')
 
@@ -105,10 +80,9 @@ def Client_Receive(clientsocket):
 
         data = [res[0], res[1], res[2]]
 
-        if(len(strings) > 20):
+        # ensure our packets didn't get messed up
+        if(len(strings) > 30):
             continue
-
-        #print(res[0].strip("'"))
 
         l_value =  float(res[0].strip("'"))
         r_value =  float(res[1].strip("'"))
@@ -119,7 +93,6 @@ def Client_Receive(clientsocket):
             r_motor_pin.write(r_value)
             time.sleep(.05)
             print(f"forwards, L = {l_value} R = {r_value}")
-            #send value/2 +28
 
         else:
             motor_toggle_pin.write(1)
@@ -127,7 +100,6 @@ def Client_Receive(clientsocket):
             r_motor_pin.write(r_value)
             time.sleep(.05)
             print(f"backwards, L = {l_value} R = {r_value}")
-            #send value/2
 
         strings = ""
 
@@ -147,7 +119,7 @@ def main():
     serversocket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
 
     # bind the socket to a public host, and a well-known port
-    serversocket.bind((HOST, 5220))
+    serversocket.bind((HOST, 5000))
     # become a server socket
     serversocket.listen(5)
 

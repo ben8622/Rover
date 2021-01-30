@@ -1,5 +1,16 @@
 """
-CONTROL SCHEME
+AUTHOR:
+Benjamin Knight
+
+WHAT IS THIS:
+This python program is to drive the UTA Mars Rover while
+directly connected to the Rover's driving arduino with the standard
+firmata sketch uploaded to it. This scheme uses a wired Xbox 360 (NOT XBOX ONE)
+controller, controlled through pygame's joystick layout
+"""
+
+"""
+CONTROLLER SCHEME
 
 Left trigger            = power sent to left motors
 Right trigger           = power sent to right motors
@@ -11,7 +22,6 @@ Making senese of the "power" values:
 0 - 0.49 | motors in "reverse", 0 is full power
 0.51 - 1 | motors in "forwards", 1 is full power
 0.5      | motors is not moving
-
 """
 import pyfirmata
 import pygame
@@ -22,13 +32,12 @@ pygame.init()
 
 # controller setup
 joysticks = []
-
 for i in range(pygame.joystick.get_count()):
     joysticks.append(pygame.joystick.Joystick(i))
     joysticks[-1].init()
-
 controller = joysticks[0]
 
+# The port changes from linux to windows, with windows having multiple COM ports
 board = pyfirmata.ArduinoMega('COM3')
 
 # setting pins
@@ -37,11 +46,6 @@ l_motor_pin =       board.get_pin('d:11:p')
 r_motor_pin =       board.get_pin('d:12:p')
 motor_toggle_pin =  board.get_pin('d:24:o')
 
-# constantly updates statuses for example if reading analog input from potentiometer
-it = pyfirmata.util.Iterator(board)
-it.start()
-
-# pressing 'select' will quit program
 while(1):
     pygame.event.pump()
 
@@ -50,6 +54,7 @@ while(1):
     l_motor_pin.write(.49804)
     r_motor_pin.write(.49804)
 
+    # press select button, exit program
     if(controller.get_button(6)):
         print("Exiting...")
         exit()
@@ -81,7 +86,9 @@ while(1):
     l_motor_pin.write(left_power)
     r_motor_pin.write(right_power)
 
+    # visualize what's being sent
     print(f"L Power:{left_power} |R Power:{right_power}")
+
     # avoid cpu overloading
     time.sleep(.05)
 

@@ -1,5 +1,24 @@
 """
-Gregory Ferguson
+AUTHORS:
+Gregory Ferguson & Benjamin Knight
+
+WHAT IS THIS:
+This python program is to drive the UTA Mars Rover while
+wirelessly connected (sockets) to the Rover's driving arduino with the standard
+firmata sketch uploaded to it. This scheme uses a wired Xbox 360 (NOT XBOX ONE)
+controller, controlled through pygame's joystick layout
+
+CONTROLLER SCHEME:
+Left trigger            = power sent to left motors
+Right trigger           = power sent to right motors
+Left + Right bumpers    = motors now go in reverse
+A button                = toggles full power
+Select button           = exit program
+
+Making senese of the "power" values:
+0 - 0.49 | motors in "reverse", 0 is full power
+0.51 - 1 | motors in "forwards", 1 is full power
+0.5      | motors is not moving
 """
 
 import socket
@@ -10,22 +29,18 @@ from inputs import get_gamepad
 import pygame
 from pygame.locals import *
 
+# Raspberry Pi's IP on network it projects
+HOST = '192.168.4.1'
 
-#HOST = '192.168.43.179'
-HOST = 'localhost'
-
-controller_command = 'A'
-
+# function to send strings to server
 def send(threadName, socket):
 
+    # controller initiaization
     pygame.init()
-
     joysticks = []
-
     for i in range(pygame.joystick.get_count()):
         joysticks.append(pygame.joystick.Joystick(i))
         joysticks[-1].init()
-
     controller = joysticks[0]
     reverse = False
 
@@ -70,27 +85,6 @@ def send(threadName, socket):
 
         time.sleep(.1)
         del data[:]
-
-    """
-     while True:
-        events = get_gamepad()
-        for event in events:
-
-            if(event.ev_type != "Sync"):
-#                print(event.code, event.state)
-#                print()
-
-                data = [controller_command, event.code, event.state]
-
-                print(data)
-
-                sent = socket.send(str(data).encode('utf8'))
-
-                if(sent == 0):
-                    raise RuntimeError("socket connection broken")
-
-                del data[:]
-    """
 
 
 def receive(threadName, socket):
