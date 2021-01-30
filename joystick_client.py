@@ -23,7 +23,6 @@ import socket
 import threading
 import ast
 import time
-from inputs import get_gamepad
 import pygame
 from pygame.locals import *
 

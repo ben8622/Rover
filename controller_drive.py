@@ -38,7 +38,8 @@ for i in range(pygame.joystick.get_count()):
 controller = joysticks[0]
 
 # The port changes from linux to windows, with windows having multiple COM ports
-board = pyfirmata.ArduinoMega('COM3')
+board = pyfirmata.ArduinoMega('COM3') # this is (one of) windows ports
+#board = pyfirmata.ArduinoMega('/dev/ttyACM0') # this is linux port
 
 # setting pins
 onboard_led =       board.get_pin('d:13:o')
