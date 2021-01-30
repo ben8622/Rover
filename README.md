@@ -1,6 +1,14 @@
 Steps to driving the Rover:
 
 Before doing anything:
+	-HAVE PYTHON DOWNLOADED AND KNOW HOW TO RUN A PYTHON PROGRAM
+	-HAVE THESE PYTHON MODULES INSTALLED:
+		-socket
+		-threading
+		-pyfirmata
+		-pygame
+		-time
+		-ast
 	-KEEP THE ROVER ELEVATED BEFORE THE PROGRAM IS RUNNING (for now)
 	-SOMEONE NEEDS TO STAY NEAR IT IN CASE A WIRE DISCONNECTS AND IT RUNS OFF (she moves fast)
 	-BE SAFE HAVE FUN (:
