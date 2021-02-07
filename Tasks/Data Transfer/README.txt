@@ -1,0 +1,1 @@
+Need ability to send command strings to an arduino and they be processed/executed.

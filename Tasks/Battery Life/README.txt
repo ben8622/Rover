@@ -1,0 +1,1 @@
+Need a way to monitor battery life and report it to the computer.

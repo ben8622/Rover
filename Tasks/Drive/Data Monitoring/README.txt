@@ -1,0 +1,1 @@
+Need to be able to monitor speed, orientation, maybe other factors?

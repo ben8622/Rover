@@ -1,0 +1,1 @@
+Need to be able to process and image/video and determine if life exists.
